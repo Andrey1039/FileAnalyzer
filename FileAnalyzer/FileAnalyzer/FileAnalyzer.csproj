@@ -5,16 +5,27 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
+    <ApplicationIcon>Media\Icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Media\File.png" />
+    <None Remove="Media\Icon.ico" />
     <None Remove="Resources\File.png" />
     <None Remove="Resources\Icon.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Resources\Icon.ico" />
+    <Content Include="Media\Icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Media\File.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Media\Icon.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -25,12 +36,6 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Resources\File.png">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
 
 </Project>

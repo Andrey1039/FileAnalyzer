@@ -12,14 +12,28 @@ using System.Collections.Generic;
 
 namespace FileAnalyzer
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        // Добавление файлов в список анализа
+        private void AddFiles(string[] files)
+        {
+            foreach (string path in files)
+                if (Directory.Exists(path))
+                {
+                    string[] newFiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+
+                    foreach (string newFile in newFiles)
+                        if (!FilesListBox.Items.Contains(newFile))
+                            FilesListBox.Items.Add(newFile);
+                }
+                else
+                    if (!FilesListBox.Items.Contains(path))
+                    FilesListBox.Items.Add(path);
         }
 
         // Выбор файлов для анализа
@@ -32,14 +46,7 @@ namespace FileAnalyzer
             openFileDialog.Multiselect = true;
 
             if (openFileDialog.ShowDialog() == true)
-            {
-                string[] selectedFilePaths = openFileDialog.FileNames;
-
-                foreach (string filePath in selectedFilePaths)
-                {
-                    FilesListBox.Items.Add(filePath);
-                }
-            }
+                AddFiles(openFileDialog.FileNames);
         }
 
         private void ItemAddBtn_Click(object sender, RoutedEventArgs e)
@@ -54,9 +61,7 @@ namespace FileAnalyzer
 
             if (selectedItems.Count > 0)
                 for (int i = selectedItems.Count - 1; i >= 0; i--)
-                    FilesListBox.Items.RemoveAt(FilesListBox.Items.IndexOf(selectedItems[i]));
-            else
-                MessageBox.Show("Ни один элемент не выбран", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                    FilesListBox.Items.Remove(selectedItems[i]);
 
             ResultTB.Text = string.Empty;
         }
@@ -106,19 +111,7 @@ namespace FileAnalyzer
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = ((string[])e.Data.GetData(DataFormats.FileDrop));
-
-                foreach (string path in files)
-                    if (Directory.Exists(path))
-                    {
-                        string[] newFiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-
-                        foreach (string newFile in newFiles)
-                            FilesListBox.Items.Add(newFile);
-                    }
-                    else
-                    {
-                        FilesListBox.Items.Add(path);
-                    }
+                AddFiles(files);                
             }
 
             DropInfo.Visibility = Visibility.Hidden;
