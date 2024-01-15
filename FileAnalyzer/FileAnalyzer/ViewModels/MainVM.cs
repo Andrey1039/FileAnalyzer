@@ -113,7 +113,7 @@ namespace FileAnalyzer.ViewModels
             }
         }
 
-        // Команда шифрования файлов
+        // Команда анализа файлов
         private RelayCommand? analyzeDataCommand;
         public RelayCommand AnalyzeDataCommand
         {
