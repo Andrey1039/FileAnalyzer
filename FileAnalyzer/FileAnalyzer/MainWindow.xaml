@@ -1,0 +1,139 @@
+﻿<Window x:Class="FileAnalyzer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:viewmodels="clr-namespace:FileAnalyzer.ViewModels"
+        xmlns:interactive="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d" MinHeight="450" MinWidth="800" Icon="/Data/Media/Icon.ico"
+        d:DataContext="{d:DesignInstance Type=viewmodels:MainVM}"
+        Title="Analyzer" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/FileAnalyzer;component/Resources/ButtonResources.xaml"/>
+                <ResourceDictionary Source="/FileAnalyzer;component/Resources/ConvertResources.xaml"/>
+                <ResourceDictionary Source="/FileAnalyzer;component/Resources/ProgressbarResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="235*"/>
+            <RowDefinition Height="199*"/>
+        </Grid.RowDefinitions>
+
+        <GroupBox Header="Анализатор:" Margin="28,0,0,0" HorizontalAlignment="Left" Width="269" Height="58" 
+                  VerticalAlignment="Top" FontWeight="Bold" FontSize="14" >
+
+            <Grid Background="#FFFFFFFF">
+
+                <RadioButton x:Name="SignatureModeBtn" Content="Сигнатурный" HorizontalAlignment="Left" Margin="10,10,0,4"
+                             FontWeight="Normal" FontSize="12" IsChecked="{Binding ElementName=HeuristicModeBtn,
+                             Path=IsChecked, Converter={StaticResource InvertBoolConverter}}"/>
+                <RadioButton x:Name="HeuristicModeBtn" Content="Эвристический" Margin="127,10,0,4" 
+                             HorizontalAlignment="Left" Width="105" FontWeight="Normal" FontSize="12"/>
+            </Grid>
+        </GroupBox>
+
+        <GroupBox Header="Список файлов:" Margin="28,63,28,5" FontSize="14" FontWeight="Bold">
+
+            <ListBox x:Name="FilesListBox" Margin="0,0,-2,0" BorderThickness="0" AllowDrop="True" 
+                     SelectionMode="Extended" FontWeight="Normal" FontSize="12" 
+                     ItemsSource="{Binding FilePaths}" FocusVisualStyle="{x:Null}">
+
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Content" Value="{Binding FileName}"/>
+                        <Setter Property="IsSelected" Value="{Binding IsChecked}"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+
+                <ListBox.InputBindings>
+                    <KeyBinding Gesture="Ctrl+A" Command="{Binding SelectAllCommand}"/>
+                    <KeyBinding Gesture="Delete" Command="{Binding RemoveCommand}"/>
+                </ListBox.InputBindings>
+
+                <interactive:Interaction.Triggers>
+                    <interactive:EventTrigger EventName="DragOver">
+                        <interactive:InvokeCommandAction Command="{Binding DragShowCommand}"
+                                                         CommandParameter="True"/>
+                    </interactive:EventTrigger>
+                </interactive:Interaction.Triggers>
+
+            </ListBox>
+        </GroupBox>
+
+        <GroupBox Header="Результаты сканирования:" Margin="28,0,26,13" FontSize="14" FontWeight="Bold" Grid.Row="1">
+            <TextBox x:Name="ResultTB" Margin="-1,0,-1,0" TextWrapping="NoWrap" BorderThickness="0" IsReadOnly="True"
+                     AcceptsReturn="True" HorizontalScrollBarVisibility="Auto" FontSize="12" FontWeight="Normal"
+                     VerticalScrollBarVisibility="Auto" Text="{Binding EndText}"/>
+        </GroupBox>
+
+        <Border x:Name="DropInfo" Margin="29,63,29,26" Background="LightGray"
+                CornerRadius="5" AllowDrop="True" BorderThickness="0" Grid.RowSpan="2"
+                Visibility="{Binding DropInfoVisible, Converter={StaticResource BoolToVis}}">
+
+            <interactive:Interaction.Triggers>
+                <interactive:EventTrigger EventName="Drop">
+                    <interactive:InvokeCommandAction Command="{Binding DragCommand}"
+                                                     PassEventArgsToCommand="True"/>
+                </interactive:EventTrigger>
+                <interactive:EventTrigger EventName="DragLeave">
+                    <interactive:InvokeCommandAction Command="{Binding DragShowCommand}"
+                                                     CommandParameter="False"/>
+                </interactive:EventTrigger>
+            </interactive:Interaction.Triggers>
+
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="262*"/>
+                    <ColumnDefinition Width="209*"/>
+                    <ColumnDefinition Width="262*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="64*"/>
+                    <RowDefinition Height="166*"/>
+                    <RowDefinition Height="103*"/>
+                </Grid.RowDefinitions>
+
+                <Image Source="/Data/Media/File.png" Margin="15,0,15,0" Grid.Row="1" Grid.Column="1" 
+                       Height="140" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <Button x:Name="AnalyzeStartBtn" Style="{DynamicResource ButtonsStyle}" Content="Анализировать" Width="108" 
+                Height="36" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="314,16,0,0"
+                IsEnabled="{Binding Items.Count, ElementName=FilesListBox}" Grid.ColumnSpan="2"
+                Command="{Binding AnalyzeDataCommand}"
+                CommandParameter="{Binding ElementName=SignatureModeBtn, Path=IsChecked}"/>
+        
+        <Button x:Name="ItemAddBtn" Style="{StaticResource ResourceKey=ButtonsStyle}" Content="📎" 
+                FontSize="22" FontStretch="Normal" Width="36" Height="36" VerticalAlignment="Top" 
+                HorizontalAlignment="Left" Margin="446,16,0,0" ToolTip="Добавить файлы"
+                Command="{Binding AddCommand}"/>
+
+        <Button x:Name="ItemDelBtn" Style="{StaticResource ResourceKey=ButtonsStyle}" Content="🗑️" 
+                HorizontalAlignment="Left" VerticalAlignment="Top" Width="36" Height="36" 
+                FontSize="22" Margin="490,16,0,0" ToolTip="Удалить файлы"
+                IsEnabled="{Binding ElementName=AnalyzeStartBtn, Path=IsEnabled}"
+                Command="{Binding RemoveCommand}"/>
+
+        <Grid x:Name="AnalyzeProcess" Background="#FFFFFFFF" Grid.RowSpan="2"
+              Visibility="{Binding TProcess, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="65*"/>
+                <RowDefinition Height="138*"/>
+            </Grid.RowDefinitions>
+
+            <ProgressBar x:Name="AnalyzeProcessPB" Style="{DynamicResource ProgressBarStyle}"
+                         HorizontalAlignment="Center" Height="30" VerticalAlignment="Top" Width="242" 
+                         Margin="0,22,0,0" Grid.Row="1" IsIndeterminate="{Binding TProcess}"/>
+
+            <Label x:Name="AnalyzeProcessL" Content="Выполняется обработка файлов..." Grid.Row="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,73,0,0"/>
+        </Grid>
+    </Grid>
+</Window>
